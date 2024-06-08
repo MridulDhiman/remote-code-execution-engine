@@ -1,6 +1,6 @@
 ## golang rabbitmq http server
 
-
+### Local rabbitmq setup
 
 Start Rabbitmq container in detached mode: `docker run -d -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.13-management`
 

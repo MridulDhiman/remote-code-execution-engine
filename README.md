@@ -8,6 +8,12 @@
 - [ ] Return the stderr, stdout to the user.
 
 
+### Rabbitmq Cloud  setup: 
+1. Login to `https://www.cloudamqp.com/`
+2. Create new Rabbitmq instance.
+3. Get AMQP instance and add to `.env` file of `/server` directory
+
+
 ### Remote machine Setup:
 > Given terraform script configures EC2 Ubuntu instance and docker pre-installed for IAM user.
 
