@@ -1,5 +1,5 @@
 FROM python:latest
 
-WORKDIR /judge/
+WORKDIR /judge
 
-CMD ["python", "code.py"]
+COPY . /judge

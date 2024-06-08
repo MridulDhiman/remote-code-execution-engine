@@ -4,7 +4,7 @@
 - [x] You take code, input and language as input, and send HTTP request. 
 - [x] It gets added to rabbitmq queue.
 - [x] Worker will take request from from queue and process it inside remote machine with docker pre-installed.
-- [ ] We will ssh into remote machine and transfer our code and then build the image.
+- [x] We will ssh into remote machine and transfer our code and then build the image.
 - [ ] Return the stderr, stdout to the user.
 
 
@@ -49,3 +49,5 @@ terraform apply
 ```bash
 terraform destroy
 ```
+
+

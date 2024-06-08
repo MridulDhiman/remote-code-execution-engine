@@ -11,7 +11,7 @@ variable "instance_type" {
 
 variable "key_name" {
     type = string
-    default = "tf-kp"
+    default = ""
 }
 
 variable "ubuntu_ami_id" {
