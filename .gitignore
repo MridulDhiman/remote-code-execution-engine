@@ -1,3 +1,4 @@
 .env
 bin
 tf-kp.pem
+exec.sh

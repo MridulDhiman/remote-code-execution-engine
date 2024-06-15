@@ -1,5 +1,5 @@
 FROM python:latest
 
-WORKDIR /judge
+WORKDIR /judge/
 
-COPY . /judge
+COPY . .

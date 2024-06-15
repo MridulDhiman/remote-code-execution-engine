@@ -181,11 +181,11 @@ func (mqConn *MQConnection) Worker(pathDockerImage string) error {
     // Create the command to execute the shell script based on the OS
     if runtime.GOOS == "windows" {
         // Use Git Bash or WSL on Windows
-        bashPath := "C:\\Program Files\\Git\\bin\\sh.exe" // Change this to your Bash path
+        bashPath := "C:\\Program Files\\Git\\bin\\bash.exe" // Change this to your Bash path
         cmd = exec.Command(bashPath, scriptPath)
     } else {
         // Use default bash on Unix-like systems
-        cmd = exec.Command("/bin/sh", scriptPath)
+        cmd = exec.Command("/bin/bash", scriptPath)
     }
 
 
