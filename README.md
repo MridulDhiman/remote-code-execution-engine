@@ -52,4 +52,11 @@ terraform apply
 terraform destroy
 ```
 
+### Demo:
 
+- Post Request:
+
+![Post Request](images/1.png)
+
+- Output: 
+![Output](images/2.png)
