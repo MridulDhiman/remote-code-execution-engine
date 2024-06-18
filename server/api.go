@@ -34,7 +34,6 @@ func makeHTTPHandlerFunc (f apiFunc) http.HandlerFunc {
 func (s* APIServer) Run() {
    router:= mux.NewRouter()
    router.HandleFunc("/code", makeHTTPHandlerFunc(s.handleCode))
-   router.HandleFunc("/codeStatus", makeHTTPHandlerFunc(s.handleCodeStatus))
    fmt.Printf("Listening on port %v", s.listenAddr);
    http.ListenAndServe(s.listenAddr, router)
 }
@@ -45,9 +44,6 @@ return s
 
 func (s* APIServer) handleCode (w http.ResponseWriter, r* http.Request) error {
 
-	if(r.Method == "GET" ) {
-		return s.handleGetCode(w,r)
-	}
 	if(r.Method == "POST") {
    return s.handleCreateCode(w,r)
 	}
@@ -56,26 +52,6 @@ func (s* APIServer) handleCode (w http.ResponseWriter, r* http.Request) error {
 return nil
 }
 
-
-
-
-func (s* APIServer) handleGetCode (w http.ResponseWriter, r* http.Request) error {
-	fmt.Print("Hello From /code route")
-	return nil
-}
-
-func (s* APIServer) handleCodeStatus (w http.ResponseWriter, r* http.Request) error {
-	if(r.Method == "GET") {
-         return s.handleGetCodeStatus(w,r)
-	}
-	return nil
-}
-
-
-func (s* APIServer) handleGetCodeStatus (w http.ResponseWriter, r* http.Request) error {
-
-	return nil
-}
 func (s* APIServer) handleCreateCode (w http.ResponseWriter, r* http.Request) error {
 
 	codeExecutionInputBody:= new(types.CodeExecutionInputBody)
