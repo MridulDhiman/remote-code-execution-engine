@@ -20,8 +20,6 @@ jobs:
         password: ${{secrets.DOCKER_PASSWORD }}
 
     - name: Build and Push Docker image
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       run: |
         docker compose pull
         docker compose -p rcee -f docker-compose.yml build 

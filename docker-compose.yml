@@ -8,7 +8,7 @@ services:
     - "5672:5672"
     - "15672:15672"
     networks:
-      - rcee-conn
+    - rcee-conn
 
   server:
     build:
@@ -16,8 +16,7 @@ services:
     command: /bin server
     environment:
     - AMQP_URL=amqp://guest:guest@amqp/
-    - DOCKER_USERNAME=${DOCKER_USERNAME}
-    image: ${DOCKER_USERNAME}/rcee-server:latest
+    image: mrimann/rcee-server:latest
     container_name: rcee-server-inst
   # env_file:
   # - ".env"
@@ -26,7 +25,7 @@ services:
     ports:
     - "8080:8080"
     networks:
-      - rcee-conn
+    - rcee-conn
   
   worker:
     # profiles:
@@ -34,20 +33,18 @@ services:
     build:
       context: server
     command: /bin worker
-    image: ${DOCKER_USERNAME}/rcee-worker:latest
     container_name: rcee-worker-inst
     depends_on:
     - amqp
     environment:
     - AMQP_URL=amqp://guest:guest@amqp/
+    image: mrimann/rcee-worker:latest
     networks:
-      - rcee-conn
+    - rcee-conn
   # env_file:
   # - ".env"
  
 networks:
   rcee-conn:
-
-
 
   
