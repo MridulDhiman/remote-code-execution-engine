@@ -14,14 +14,15 @@ services:
     build:
       context: server
     command: /bin server
+    environment:
+    - AMQP_URL=amqp://guest:guest@amqp/
+    - DOCKER_USERNAME=${DOCKER_USERNAME}
     image: ${DOCKER_USERNAME}/rcee-server:latest
     container_name: rcee-server-inst
   # env_file:
   # - ".env"
     depends_on:
     - amqp
-    environment:
-    - AMQP_URL=amqp://guest:guest@amqp/
     ports:
     - "8080:8080"
     networks:
