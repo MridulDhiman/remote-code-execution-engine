@@ -16,7 +16,7 @@ services:
     command: /bin server
     environment:
     - AMQP_URL=amqp://guest:guest@amqp/
-    image: mrimann/rcee-server:latest
+    image: mrimann/rcee-server
     container_name: rcee-server-inst
   # env_file:
   # - ".env"
@@ -38,7 +38,7 @@ services:
     - amqp
     environment:
     - AMQP_URL=amqp://guest:guest@amqp/
-    image: mrimann/rcee-worker:latest
+    image: mrimann/rcee-worker
     networks:
     - rcee-conn
   # env_file:

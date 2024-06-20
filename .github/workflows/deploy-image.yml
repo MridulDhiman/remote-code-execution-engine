@@ -22,8 +22,8 @@ jobs:
     - name: Build and Push Docker image
       run: |
         docker compose pull
-        docker compose -p rcee -f docker-compose.yml build 
-        docker compose -f docker-compose.yml push 
+        docker compose -p rcee build 
+        docker compose  push 
 
     ## Tags if necessarry:
         #  docker tag ${{ secrets.SERVICE_1 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.SERVICE_1 }}
