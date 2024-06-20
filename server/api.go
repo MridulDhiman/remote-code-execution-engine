@@ -48,7 +48,6 @@ func (s* APIServer) handleCode (w http.ResponseWriter, r* http.Request) error {
    return s.handleCreateCode(w,r)
 	}
 
-	
 return nil
 }
 
@@ -59,7 +58,10 @@ func (s* APIServer) handleCreateCode (w http.ResponseWriter, r* http.Request) er
 		return err
 	}
 
-   // code, input
+	lang:= codeExecutionInputBody.Lang
+	if lang != "javascript" && lang != "python" && lang != "c++" && lang != "c" {
+		return utils.WriteJSON(w, http.StatusUnprocessableEntity, types.ErrorResponse{Message: "Language Not Supported"})
+	}
 
    // add to queue => message queue
    go s.mqConn.AddToQueue(*codeExecutionInputBody)

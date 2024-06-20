@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  amqp: 
+    image: rabbitmq:3.13-alpine
+    container_name: rcee-amqp-inst
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    networks:
+      - rcee-conn
+
+  server:
+    build:
+      context: server
+    command: /bin server
+    image: ${DOCKER_USERNAME}/rcee-server:latest
+    container_name: rcee-server-inst
+  # env_file:
+  # - ".env"
+    depends_on:
+    - amqp
+    environment:
+    - AMQP_URL=amqp://guest:guest@amqp/
+    ports:
+    - "8080:8080"
+    networks:
+      - rcee-conn
+  
+  worker:
+    # profiles:
+    # - manual
+    build:
+      context: server
+    command: /bin worker
+    image: ${DOCKER_USERNAME}/rcee-worker:latest
+    container_name: rcee-worker-inst
+    depends_on:
+    - amqp
+    environment:
+    - AMQP_URL=amqp://guest:guest@amqp/
+    networks:
+      - rcee-conn
+  # env_file:
+  # - ".env"
+ 
+networks:
+  rcee-conn:
+
+
+
+  

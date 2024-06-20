@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"gobackend/types"
 	"gobackend/utils"
-	"runtime"
 	"log"
 	"os"
 	"os/exec"
+	"path"
+	"runtime"
 	"time"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -100,6 +102,8 @@ func (mqConn *MQConnection) AddToQueue(input types.CodeExecutionInputBody) error
 	return nil
 }
 
+
+
 func (mqConn *MQConnection) Worker() error {
    conn, ch, q, _ , cancel := mqConn.Init()
    defer conn.Close()
@@ -128,8 +132,14 @@ func (mqConn *MQConnection) Worker() error {
             
 
 			code := inputBody.Code
-
-			file, err := os.Create("scripts/code.js")
+			lang:= inputBody.Lang
+	runTime:= utils.GetRuntimeFromLang(lang)
+	fileName:= utils.GetFilenameFromLang(lang)
+	
+	
+			filePath := path.Join("scripts", fileName)
+            
+			file, err := os.Create(filePath)
 
               if err != nil {
 				FailOnError(err, "Could not create file")
@@ -141,22 +151,6 @@ func (mqConn *MQConnection) Worker() error {
 
 			  // execute script
 			  scriptPath:= "scripts/exec.sh"
-			  // Get and print the current working directory
-	wd, err := os.Getwd()
-	if err != nil {
-		fmt.Println("Error getting working directory:", err)
-		return
-	}
-	fmt.Println("Current working directory:", wd)
-
-		// Check if the file exists
-		if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
-			fmt.Println("File does not exist:", scriptPath)
-			return
-		} else if err != nil {
-			fmt.Println("Error checking file:", err)
-			return
-		}
 	
 
 			  // make the file executable
@@ -175,8 +169,15 @@ func (mqConn *MQConnection) Worker() error {
     } else {
         // Use default bash on Unix-like systems
         cmd = exec.Command("/bin/bash", scriptPath)
+
     }
 
+	var runTimeVar = "RUNTIME=" + runTime;
+	var fileNameVar = "CODE_FILE=" + fileName;
+	
+	// appends env. variables to command
+	cmd.Env = append(os.Environ(), runTimeVar, fileNameVar)
+	
 			  // output 
 			  output, err := cmd.CombinedOutput()
 			  if err != nil {
@@ -186,16 +187,16 @@ func (mqConn *MQConnection) Worker() error {
 
 			  fmt.Println(string(output))
 
-
 			dotCount := bytes.Count(d.Body, []byte("."))
 			t := time.Duration(dotCount)
-			time.Sleep(t * time.Second)
+			time.Sleep(t * time.Millisecond)
 			log.Printf("Done")
 		}
 	
 	}()
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	// it will make the main thread to be forever blocked, unless there is some error
 	<-forever
 
 	return nil

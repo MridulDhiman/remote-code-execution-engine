@@ -1,0 +1,41 @@
+name: Deploy Docker Image
+
+on: [workflow_dispatch]
+
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Setup Docker Buildx for Building Image
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with: 
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{secrets.DOCKER_PASSWORD }}
+
+    - name: Build and Push Docker image
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      run: |
+        docker compose pull
+        docker compose -p rcee -f docker-compose.yml build 
+        docker compose -f docker-compose.yml push 
+
+    ## Tags if necessarry:
+        #  docker tag ${{ secrets.SERVICE_1 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.SERVICE_1 }}
+        # docker tag ${{ secrets.SERVICE_2 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.SERVICE_2 }}
+        # docker tag ${{ secrets.SERVICE_3 }} ${{ secrets.DOCKER_USERNAME }}/${{ secrets.SERVICE_3 }}
+
+        
+    # - name: Build and push Docker image
+    #   uses: docker/build-push-action@v3
+    #   with:
+    #     context: server
+    #     push: true
+    #     tags: ${{ secrets.DOCKER_USERNAME }}/rcee:latest
