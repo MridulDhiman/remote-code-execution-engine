@@ -33,7 +33,7 @@ func makeHTTPHandlerFunc (f apiFunc) http.HandlerFunc {
 
 func (s* APIServer) Run() {
    router:= mux.NewRouter()
-   router.HandleFunc("/code", makeHTTPHandlerFunc(s.handleCode))
+   router.HandleFunc("/code", utils.RateLimiter(makeHTTPHandlerFunc(s.handleCode)))
    fmt.Printf("Listening on port %v", s.listenAddr);
    http.ListenAndServe(s.listenAddr, router)
 }
@@ -43,24 +43,26 @@ return s
 }
 
 func (s* APIServer) handleCode (w http.ResponseWriter, r* http.Request) error {
-
 	if(r.Method == "POST") {
    return s.handleCreateCode(w,r)
 	}
-
 return nil
 }
 
 func (s* APIServer) handleCreateCode (w http.ResponseWriter, r* http.Request) error {
-
 	codeExecutionInputBody:= new(types.CodeExecutionInputBody)
 	if err:= json.NewDecoder(r.Body).Decode(codeExecutionInputBody); err != nil {
 		return err
 	}
 
 	lang:= codeExecutionInputBody.Lang
-	if lang != "javascript" && lang != "python" && lang != "c++" && lang != "c" {
+	code:= codeExecutionInputBody.Code
+	if utils.IsLanguageSupported(lang) {
 		return utils.WriteJSON(w, http.StatusUnprocessableEntity, types.ErrorResponse{Message: "Language Not Supported"})
+	}
+
+	if utils.HasSuspiciousPatterns(code) {
+		return utils.WriteJSON(w, http.StatusUnprocessableEntity, types.ErrorResponse{Message: "Potentially malicious code detected..."})
 	}
 
    // add to queue => message queue

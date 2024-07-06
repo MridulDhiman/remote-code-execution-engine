@@ -21,7 +21,11 @@ docker run -dit --name $CONTAINER_NAME  $IMAGE_NAME
 docker cp ${REMOTE_DIR}/$CODE_FILE $CONTAINER_NAME:/judge/$CODE_FILE
 
 # Execute the code file inside the Docker container using it's corresponding compiler/runtime
-docker exec $CONTAINER_NAME $LANG_EXECUTABLE /judge/
+if [[ $HAS_INPUT = "true" ]] then 
+  docker exec $CONTAINER_NAME $LANG_EXECUTABLE /judge/$CODE_FILE < $INPUT_FILE
+else 
+  docker exec $CONTAINER_NAME $LANG_EXECUTABLE /judge/$CODE_FILE
+fi
 
 ## Stop and remove the container
 docker stop $CONTAINER_NAME
