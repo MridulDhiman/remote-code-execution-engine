@@ -18,8 +18,6 @@ services:
     - AMQP_URL=amqp://guest:guest@amqp/
     image: mrimann/rcee-server
     container_name: rcee-server-inst
-  # env_file:
-  # - ".env"
     depends_on:
     - amqp
     ports:
@@ -28,8 +26,6 @@ services:
     - rcee-conn
   
   worker:
-    # profiles:
-    # - manual
     build:
       context: server
     command: /bin worker
@@ -41,8 +37,6 @@ services:
     image: mrimann/rcee-worker
     networks:
     - rcee-conn
-  # env_file:
-  # - ".env"
  
 networks:
   rcee-conn:
