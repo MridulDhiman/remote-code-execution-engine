@@ -7,7 +7,7 @@
 3. Realtime feedback to client using websocket layer.
 4. Code execution in sandboxed environment.
 5. Code sanitization and prevention of malicious code from executing.
-6. Multi stage docker build of docker application.
+6. Multi stage docker build of golang application.
 7. Token based rate limiting.
 8. CI/CD pipeline to automatically push the server and worker instance images to docker hub with :latest tag.
 9. k8s scripts to deploy application to eks cluster manually using github actions dashboard.
