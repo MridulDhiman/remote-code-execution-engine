@@ -1,6 +1,7 @@
 #!/bin/bash
 
-REMOTE_DIR="/home/ubuntu/code"
+REMOTE_DIR=""
+BUCKET_NAME=""
 
 sudo apt-get update -y
 sudo apt-get install -y docker.io
@@ -14,7 +15,7 @@ sudo ./aws/install
 
 echo "export AWS_DEFAULT_REGION=ap-south-1" >> /etc/environment
 mkdir  $REMOTE_DIR
-aws s3 sync s3://remotecodeexecutionengine $REMOTE_DIR
+aws s3 sync s3://$BUCKET_NAME $REMOTE_DIR
 docker build -t javascript-image $REMOTE_DIR/javascript
 docker build -t gcc-image $REMOTE_DIR/gcc
 docker build -t python-image $REMOTE_DIR/python
