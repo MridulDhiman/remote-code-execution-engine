@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"gobackend/types"
 	"gobackend/utils"
+	"gobackend/ws"
 	"log"
 	"os"
 	"os/exec"
 	"path"
 	"runtime"
 	"time"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -99,11 +101,17 @@ func (mqConn *MQConnection) Worker() error {
 		false,
 		nil,
 	)
-	FailOnError(err, "failed to register consumer")
-	var forever chan struct{}
-	go func() {
-		for d := range msgs {
 
+	  
+	FailOnError(err, "failed to register consumer")
+
+	var forever chan struct{}
+
+
+	go func() {
+
+		for d := range msgs {
+              go ws.Ws.SendMsg("Processing")
 			inputBody, err := utils.DecodeInput(d.Body)
 			FailOnError(err, "Could not decode the bytes")
 			log.Printf("Received a message: %+v", inputBody)
@@ -155,14 +163,19 @@ func (mqConn *MQConnection) Worker() error {
 	fmt.Println(fileNameVar, inputFileNameVar, contNameVar, dockerRunCmdVar, dockerExecCmdVar)
 	
 	// appends env. variables to command
+	
+	go ws.Ws.SendMsg("Processed")
+	go ws.Ws.SendMsg("Executing")
 	cmd.Env = append(os.Environ(), fileNameVar, inputFileNameVar, contNameVar, dockerRunCmdVar, dockerExecCmdVar)
 			  // output 
-			//   output, err := cmd.CombinedOutput()
-			//   if err != nil {
-			// 	fmt.Println("err executing script: ", err)
-			// 	return
-			//   }
-			//   fmt.Println(string(output))
+			  output, err := cmd.CombinedOutput()
+			  if err != nil {
+				fmt.Println("err executing script: ", err)
+				return
+			  }
+			  fmt.Println(string(output))
+			go ws.Ws.SendMsg("Finished")
+			go ws.Ws.SendMsg(string(output))
 			dotCount := bytes.Count(d.Body, []byte("."))
 			t := time.Duration(dotCount)
 			time.Sleep(t * time.Millisecond)

@@ -6,10 +6,18 @@ import (
 	"gobackend/rabbitmq"
 	"gobackend/types"
 	"gobackend/utils"
+	"gobackend/ws"
 	"log"
 	"net/http"
+
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 )
+
+var (
+	upgrader = websocket.Upgrader{} 
+)
+
 
 type APIServer struct {
 	listenAddr string
@@ -25,6 +33,8 @@ type apiFunc func (http.ResponseWriter, *http.Request)  error
 
 func makeHTTPHandlerFunc (f apiFunc) http.HandlerFunc {
 	return func (w http.ResponseWriter, r* http.Request)  {
+		// idhar websocket setup kr denge
+
               if  err:= f(w,r); err!= nil {
 				log.Fatal(err)
 			  }
@@ -34,12 +44,38 @@ func makeHTTPHandlerFunc (f apiFunc) http.HandlerFunc {
 func (s* APIServer) Run() {
    router:= mux.NewRouter()
    router.HandleFunc("/code", utils.RateLimiter(makeHTTPHandlerFunc(s.handleCode)))
+   router.HandleFunc("/echo", utils.RateLimiter(makeHTTPHandlerFunc(s.WsServer)))
    fmt.Printf("Listening on port %v", s.listenAddr);
    http.ListenAndServe(s.listenAddr, router)
 }
 
 func (s* APIServer) GetAPIServer() *APIServer {
 return s
+}
+
+func (s* APIServer) WsServer(w http.ResponseWriter, r* http.Request) error {
+   wsConn, err := upgrader.Upgrade(w,r, nil)
+   if err != nil {
+	return err
+   }
+
+   defer wsConn.Close()
+
+   for {
+	mt, message, err:= wsConn.ReadMessage()
+	if err != nil {
+		log.Println("read:", err)
+		break
+	}
+	log.Printf("recv: %s", message)
+		err = wsConn.WriteMessage(mt, message)
+		if err != nil {
+			log.Println("write:", err)
+			break
+		}
+
+   }
+	return nil
 }
 
 func (s* APIServer) handleCode (w http.ResponseWriter, r* http.Request) error {
@@ -67,5 +103,6 @@ func (s* APIServer) handleCreateCode (w http.ResponseWriter, r* http.Request) er
 
    // add to queue => message queue
    go s.mqConn.AddToQueue(*codeExecutionInputBody)
+   go ws.Ws.SendMsg("Initiated");
 return utils.WriteJSON(w, http.StatusOK, types.AckResponse{ Status: "pending"})
 }
