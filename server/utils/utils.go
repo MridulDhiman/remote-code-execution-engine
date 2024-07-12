@@ -8,9 +8,25 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"sync"
-
 	"golang.org/x/time/rate"
+)
+
+var (
+	allowedLanguages = map[string]bool{
+		"javascript" : true,
+		"python": true,
+		"cpp": true,
+		"c" : true,
+		"rust" : true,
+	}
+
+	JsConfig = types.NewLangConfig("javascript", false, "node", "code.js")
+	PyConfig = types.NewLangConfig("python", false, "python", "code.py")
+	CppConfig = types.NewLangConfig("cpp", true, "g++", "code.cpp")
+	CConfig = types.NewLangConfig("c", true, "gcc", "code.c")
+	RustConfig = types.NewLangConfig("rust", true, "rustc", "code.rs")
+
+	langConfig = []*types.LangConfig{JsConfig, PyConfig, CppConfig, CConfig, RustConfig}
 )
 
 func FailOnError(err error, msg string) {
@@ -45,55 +61,20 @@ func WriteJSON(w http.ResponseWriter, status int, input any) error {
 	return nil
 }
 
-// make a global map
-var m map[string][2]string = make(map[string][2]string)
-
-var mutex sync.RWMutex
-
-func mapSetter(lang string, runtime string, fileName string) {
-	mutex.Lock()
-	m[lang] = [2]string{runtime, fileName}
-	mutex.Unlock()
-}
-
-func mapGetter(lang string) [2]string {
-	mutex.RLock()
-	result := m[lang]
-	mutex.RUnlock()
-	return result
-}
-
-func initializeMap() {
-mapSetter("javascript", "node", "code.js")
-mapSetter("python", "python", "code.py")
-mapSetter("cpp", "gcc", "code.cpp")
-mapSetter("c", "gcc", "code.c")
-mapSetter("rust", "rustc", "code.rs")
-}
-func GetRuntimeFromLang(lang string) string {
-initializeMap()
-result := mapGetter(lang)
-return result[0]
-}
-
-func GetFilenameFromLang(lang string) string {
-	initializeMap()
-	result := mapGetter(lang)
-	return result[1]
-}
 
 func IsLanguageSupported (lang string)  bool {
-	allowedLanguages:= map[string]bool{
-		"javascript" : true,
-		"python": true,
-		"cpp": true,
-		"c" : true,
-		"rust" : true,
-	}
-
 	return !allowedLanguages[lang]
 }
 
+func GetLangConfig (lang string) *types.LangConfig {
+	for _, config := range langConfig {
+		if config.Lang == lang {
+			return config
+		}
+	}
+
+	return &types.LangConfig{}
+}
 
 func HasSuspiciousPatterns (code string) bool {
 	patterns := []*regexp.Regexp{

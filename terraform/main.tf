@@ -2,6 +2,35 @@ provider "aws" {
   region = var.aws_region
 }
 
+resource "aws_iam_role" "ec2_s3_access_role" {
+  name = "ec2_s3_access_role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Sid = ""
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+## attach s3 read only policy to iam role
+resource "aws_iam_role_policy_attachment" "s3_access_policy" {
+  role = aws_iam_role.ec2_s3_access_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+}
+
+
+## attach iam role to iam instance profile 
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_s3_access_role.name
+}
 
 resource "aws_security_group" "ec2_sg" {
   name        = "ec2_sg"
@@ -29,6 +58,7 @@ resource "aws_instance" "ec2_instance" {
   instance_type          = var.instance_type
   key_name               = var.key_name
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
   user_data = file("hello.sh")
 
   tags = {

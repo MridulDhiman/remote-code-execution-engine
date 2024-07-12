@@ -110,10 +110,10 @@ func (mqConn *MQConnection) Worker() error {
 			code := inputBody.Code
 			lang:= inputBody.Lang
 			input := inputBody.Input
-	runTime:= utils.GetRuntimeFromLang(lang)
-	fileName:= utils.GetFilenameFromLang(lang)
+
+	langConfig := utils.GetLangConfig(lang)
 	var inputFileName = "input.txt"
-			filePath := path.Join("scripts", fileName)
+			filePath := path.Join("scripts", langConfig.FileName)
 			inputFilePath := path.Join("scripts", inputFileName)
 			inputFile, err := os.Create(inputFilePath)
               if err != nil {
@@ -144,21 +144,25 @@ func (mqConn *MQConnection) Worker() error {
         cmd = exec.Command("/bin/bash", scriptPath)
 
     }
-	var runTimeVar = "RUNTIME=" + runTime;
-	var fileNameVar = "CODE_FILE=" + fileName;
-	var hasInput = len(input) > 0
+	_, contName := langConfig.GetImageAndContainerName()
+
+	var fileNameVar = "CODE_FILE=" + langConfig.FileName;
 	var inputFileNameVar = "INPUT_FILE=" + inputFileName;
-	var hasInputVar = "HAS_INPUT=" + fmt.Sprintf("%v", hasInput)
-	fmt.Println(hasInputVar)
+	var contNameVar = "CONTAINER_NAME=" + contName;
+	var dockerRunCmdVar = "DOCKER_RUN_CMD=" + langConfig.DockerRunCmd()
+	var dockerExecCmdVar = "DOCKER_EXEC_CMD=" + langConfig.DockerExecCmd(len(input) > 0)
+	
+	fmt.Println(fileNameVar, inputFileNameVar, contNameVar, dockerRunCmdVar, dockerExecCmdVar)
+	
 	// appends env. variables to command
-	cmd.Env = append(os.Environ(), runTimeVar, fileNameVar, inputFileNameVar, hasInputVar)
+	cmd.Env = append(os.Environ(), fileNameVar, inputFileNameVar, contNameVar, dockerRunCmdVar, dockerExecCmdVar)
 			  // output 
-			  output, err := cmd.CombinedOutput()
-			  if err != nil {
-				fmt.Println("err executing script: ", err)
-				return
-			  }
-			  fmt.Println(string(output))
+			//   output, err := cmd.CombinedOutput()
+			//   if err != nil {
+			// 	fmt.Println("err executing script: ", err)
+			// 	return
+			//   }
+			//   fmt.Println(string(output))
 			dotCount := bytes.Count(d.Body, []byte("."))
 			t := time.Duration(dotCount)
 			time.Sleep(t * time.Millisecond)

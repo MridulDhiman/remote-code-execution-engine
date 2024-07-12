@@ -2,14 +2,15 @@ package main
 
 import (
 	"gobackend/rabbitmq"
+	"gobackend/utils"
 	"log"
 	"os"
-	// "github.com/joho/godotenv"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	// err := godotenv.Load()
-	// utils.FailOnError(err, "Could not read .env files")
+	err := godotenv.Load()
+	utils.FailOnError(err, "Could not read .env files")
 	conn := rabbitmq.NewMQConnection(os.Getenv("AMQP_URL"))
 	arg1 := os.Args[1]
 	if arg1 == "worker" {
